@@ -1,0 +1,44 @@
+05-08-2023
+==========
+Initial code written.
+
+05-09-2023
+==========
+IMPROVEMENT: Added comments in config file support.
+IMPROVEMENT: Added malloc_trim support.
+FIX: malloc_usable_size() call.
+
+05-12-2023
+==========
+IMPROVEMENT: Code formatting.
+
+05-17-2023
+==========
+FIX: Wrong Linux preprocessor macro.
+FIX: Definitions of m_Malloc_usable_size, m_Malloc_trim.
+FIX: Solaris 10 runtime error when libC not found. Note, malloc_usable_size exists in Solaris 11.
+
+05-21-2023
+==========
+FIX: Malloc recursion dump on Linux.
+FIX: Malloc recursion dump on error messages; removed (see "Restrictions" in README).
+FIX: Removed inheritance; it is danger to use in this context.
+
+05-22-2023
+==========
+FIX: Removed MSVC code.
+IMPROVEMENT: Added hints to branches in functions implementations.
+
+05-23-2023
+==========
+IMPROVEMENT: Added noexcept in CTors. It makes no sense to generate stack unwinding, in case of an exception, recursion to malloc will still occur here.
+
+06-05-2023
+==========
+FIX: PVS warning in getRuntimeNchunk().
+
+07-07-2023
+==========
+IMPROVEMENT: Made custom allocator API function names customizable. Now you can use memproxy with any custom allocator.
+IMPROVEMENT: Remove malloc_trim() function check due to platform specific.
+FIX: Typos in READMEs.
