@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[1])
 m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[9])
+m4_define([VERSION_MICRO],[10])
 
 AC_INIT(memproxy, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memproxy)
 
 MEMPROXY_CURRENT=1
-MEMPROXY_REVISION=9
+MEMPROXY_REVISION=10
 MEMPROXY_AGE=0
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -24,6 +24,7 @@ MEMPROXY_AGE=0
 # 1.0.7 had 1:7:0
 # 1.0.8 had 1:8:0
 # 1.0.9 had 1:9:0
+# 1.0.10 had 1:10:0
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary

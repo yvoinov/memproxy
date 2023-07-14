@@ -164,7 +164,7 @@ private:
 };
 
 class CheckProgramInList {
-public:
+protected:
 	CheckProgramInList() noexcept {
 		std::unordered_set<std::string> v_list;
 		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
@@ -183,7 +183,7 @@ private:
 	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
 };
 
-class MemoryProxyFunctions2 {	// Memory functions from libC
+class MemoryProxyFunctions2 : CheckProgramInList {	// Memory functions from libC
 public:
 	func1_t m_Malloc;
 	func2_t m_Realloc;
@@ -206,7 +206,7 @@ public:
 	~MemoryProxyFunctions2() {}
 
 private:
-	MemoryProxyFunctions2() noexcept {
+	MemoryProxyFunctions2() noexcept : CheckProgramInList() {
 		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
 		m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func12)));
 		m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func22)));
@@ -221,7 +221,6 @@ private:
 		if (!m_Malloc || !m_Realloc || !m_Calloc || !m_Free || !m_Memalign)
 		#endif
 			return;	/* If libC not preload, throw */
-		CheckProgramInList cpl;	// We're instantiate class here; to avoid using null malloc pointer
 	}
 
 	/* Memory functions names */

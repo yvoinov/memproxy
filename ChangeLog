@@ -42,3 +42,8 @@ FIX: PVS warning in getRuntimeNchunk().
 IMPROVEMENT: Made custom allocator API function names customizable. Now you can use memproxy with any custom allocator.
 IMPROVEMENT: Remove malloc_trim() function check due to platform specific.
 FIX: Typos in READMEs.
+
+07-13-2023
+==========
+IMPROVEMENT: Made CheckProgramInList instantiation idiomatic.
+IMPROVEMENT: Made CheckProgramInList CTor protected.
