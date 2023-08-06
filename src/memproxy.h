@@ -10,8 +10,6 @@
 
 #include <cstdlib>	// For std::size_t
 #include <cstdint>	// For std::uintptr_t
-#include <array>
-#include <iostream>	// For std::cin
 #include <fstream>
 #include <string>
 #include <unordered_set>
@@ -54,8 +52,6 @@
 // Executable name limit
 #define NAME_CHUNK 16
 
-#define STATIC_CALLOC_BUFFER_SIZE 32
-
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
 #define CUSTOM_MALLOC   "TCMallocInternalMalloc"
@@ -91,8 +87,7 @@
 
 namespace {
 
-std::array<char, STATIC_CALLOC_BUFFER_SIZE> g_static_calloc_buffer;
-bool g_Exists { false }, g_innerCalloc { false };
+bool g_Exists { false };
 
 using uInt_t = std::size_t;
 using voidPtr_t = void*;
@@ -131,7 +126,6 @@ public:
 
 private:
 	MemoryProxyFunctions1() noexcept {	// It makes no sense to generate stack unwinding, in case of an exception, recursion to malloc will still occur here.
-		g_innerCalloc = true;
 		m_cMalloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
 		m_cRealloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
 		m_cCalloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
@@ -148,7 +142,6 @@ private:
 			// Note: We're cannot output anything here due to allocations under the hood; also, throw
 			// also allocation, so you're got recursive dump.
 			return;	/* If custom allocator not preload, throw */
-		g_innerCalloc = false;
 	}
 
 	/* Memory functions names */

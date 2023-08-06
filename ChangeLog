@@ -47,3 +47,7 @@ FIX: Typos in READMEs.
 ==========
 IMPROVEMENT: Made CheckProgramInList instantiation idiomatic.
 IMPROVEMENT: Made CheckProgramInList CTor protected.
+
+08-06-2023
+==========
+IMPROVEMENT: Refactoring - removed unnesessary code.

@@ -66,8 +66,6 @@ inline void free_impl(voidPtr_t ptr)
 
 inline voidPtr_t calloc_impl(uInt_t n, uInt_t size)
 {
-	if (g_innerCalloc)	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
-		return g_static_calloc_buffer.data();
 	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Calloc(n, size);
 	else return MemoryProxyFunctions1::GetInstance().m_cCalloc(n, size);
 }
