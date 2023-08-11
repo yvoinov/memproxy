@@ -92,17 +92,20 @@ bool g_Exists { false };
 using uInt_t = std::size_t;
 using voidPtr_t = void*;
 
-using func1_t = voidPtr_t (*)(uInt_t);			/* func1_t Type 1: malloc */
-using func2_t = voidPtr_t (*)(voidPtr_t, uInt_t);	/* func2_t Type 2: realloc */
-using func3_t = voidPtr_t (*)(uInt_t, uInt_t);		/* func3_t Type 3: calloc */
-using func4_t = void (*)(voidPtr_t);			/* func4_t Type 4: free */
-using func5_t = voidPtr_t (*)(uInt_t, uInt_t);		/* func5_t Type 5: memalign */
-using func6_t = uInt_t (*)(voidPtr_t);			/* func6_t Type 6: malloc_usable_size */
-#if defined(__linux__)
-using func7_t = int (*)(uInt_t);			/* func7_t Type 7: malloc_trim */
-#endif
+class FunctionsPtrTypes {
+protected:
+	using func1_t = voidPtr_t (*)(uInt_t);			/* func1_t Type 1: malloc */
+	using func2_t = voidPtr_t (*)(voidPtr_t, uInt_t);	/* func2_t Type 2: realloc */
+	using func3_t = voidPtr_t (*)(uInt_t, uInt_t);		/* func3_t Type 3: calloc */
+	using func4_t = void (*)(voidPtr_t);			/* func4_t Type 4: free */
+	using func5_t = voidPtr_t (*)(uInt_t, uInt_t);		/* func5_t Type 5: memalign */
+	using func6_t = uInt_t (*)(voidPtr_t);			/* func6_t Type 6: malloc_usable_size */
+	#if defined(__linux__)
+	using func7_t = int (*)(uInt_t);			/* func7_t Type 7: malloc_trim */
+	#endif
+};
 
-class MemoryProxyFunctions1 {	// Memory functions from preloaded library
+class MemoryProxyFunctions1 : FunctionsPtrTypes {	// Memory functions from preloaded library
 public:
 	func1_t m_cMalloc;	/* Arg type 1 */
 	func2_t m_cRealloc;	/* Arg type 2 */
@@ -176,7 +179,7 @@ private:
 	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
 };
 
-class MemoryProxyFunctions2 : CheckProgramInList {	// Memory functions from libC
+class MemoryProxyFunctions2 : FunctionsPtrTypes, CheckProgramInList {	// Memory functions from libC
 public:
 	func1_t m_Malloc;
 	func2_t m_Realloc;

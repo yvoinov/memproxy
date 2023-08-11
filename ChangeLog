@@ -51,3 +51,7 @@ IMPROVEMENT: Made CheckProgramInList CTor protected.
 08-06-2023
 ==========
 IMPROVEMENT: Refactoring - removed unnesessary code.
+
+08-11-2023
+==========
+IMPROVEMENT: Refactoring - functions pointers types grouped in FunctionsPtrTypes class.
