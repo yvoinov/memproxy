@@ -13,6 +13,9 @@
 #include <fstream>
 #include <string>
 #include <unordered_set>
+
+#include <sys/mman.h>
+
 #if !defined(__FreeBSD__) && !defined(__OpenBSD__)
 #include <malloc.h>
 #endif

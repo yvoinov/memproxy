@@ -59,3 +59,7 @@ IMPROVEMENT: Refactoring - functions pointers types grouped in FunctionsPtrTypes
 08-21-2023
 ==========
 IMPROVEMENT: Added check libdl and set if found.
+
+12-09-2023
+==========
+IMPROVEMENT: Added dlsym()/calloc() workaround with mmap().
