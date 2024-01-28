@@ -57,13 +57,13 @@
 
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
-#define CUSTOM_MALLOC   "TCMallocInternalMalloc"
-#define CUSTOM_REALLOC  "TCMallocInternalRealloc"
-#define CUSTOM_CALLOC   "TCMallocInternalCalloc"
-#define CUSTOM_FREE     "TCMallocInternalFree"
-#define CUSTOM_MEMALIGN "TCMallocInternalMemalign"
-#define CUSTOM_SIZE     "TCMallocInternalMallocSize"
-#define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
+#define CUSTOM_MALLOC   "ltmalloc"
+#define CUSTOM_REALLOC  "ltrealloc"
+#define CUSTOM_CALLOC   "ltcalloc"
+#define CUSTOM_FREE     "ltfree"
+#define CUSTOM_MEMALIGN "ltmemalign"
+#define CUSTOM_SIZE     "ltmsize"
+#define CUSTOM_TRIM     "ltsqueeze"
 
 // Solaris has libc.so.1
 // Linux has libc.so.6
@@ -132,14 +132,14 @@ public:
 
 private:
 	MemoryProxyFunctions1() noexcept {	// It makes no sense to generate stack unwinding, in case of an exception, recursion to malloc will still occur here.
-		m_cMalloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
-		m_cRealloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
-		m_cCalloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
-		m_cFree = reinterpret_cast<func4_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func4)));
-		m_cMemalign = reinterpret_cast<func5_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func5)));
-		m_cMalloc_usable_size = reinterpret_cast<func6_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func6)));
+		m_cMalloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func1));
+		m_cRealloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, m_c_func2));
+		m_cCalloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
+		m_cFree = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
+		m_cMemalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func5));
+		m_cMalloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, m_c_func6));
 		#if defined(__linux__)
-		m_cMalloc_trim = reinterpret_cast<func7_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func7)));
+		m_cMalloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, m_c_func7));
 		// malloc_trim is absent in many implementations of custom allocators, so we do not check for the presence of the function.
 		if (!m_cMalloc || !m_cRealloc || !m_cCalloc || !m_cFree || !m_cMemalign || !m_cMalloc_usable_size)
 		#else
@@ -207,14 +207,14 @@ public:
 private:
 	MemoryProxyFunctions2() noexcept : CheckProgramInList() {
 		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
-		m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func12)));
-		m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func22)));
-		m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func32)));
-		m_Free = reinterpret_cast<func4_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func42)));
-		m_Memalign = reinterpret_cast<func5_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func52)));
-		m_Malloc_usable_size = reinterpret_cast<func6_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func62)));
+		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
+		m_Realloc = reinterpret_cast<func2_t>(dlsym(v_handle, m_c_func22));
+		m_Calloc = reinterpret_cast<func3_t>(dlsym(v_handle, m_c_func32));
+		m_Free = reinterpret_cast<func4_t>(dlsym(v_handle, m_c_func42));
+		m_Memalign = reinterpret_cast<func5_t>(dlsym(v_handle, m_c_func52));
+		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(v_handle, m_c_func62));
 		#if defined(__linux__)
-		m_Malloc_trim = reinterpret_cast<func7_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func72)));
+		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(v_handle, m_c_func72));
 		if (!m_Malloc || !m_Realloc || !m_Calloc || !m_Free || !m_Memalign || !m_Malloc_usable_size)
 		#else
 		if (!m_Malloc || !m_Realloc || !m_Calloc || !m_Free || !m_Memalign)

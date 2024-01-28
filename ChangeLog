@@ -63,3 +63,7 @@ IMPROVEMENT: Added check libdl and set if found.
 12-09-2023
 ==========
 IMPROVEMENT: Added dlsym()/calloc() workaround with mmap().
+
+01-28-2024
+==========
+IMPROVEMENT: Removed excessive casting.
