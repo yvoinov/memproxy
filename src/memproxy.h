@@ -138,6 +138,9 @@ private:
 		m_cFree = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
 		m_cMemalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func5));
 		m_cMalloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, m_c_func6));
+		#if defined(__linux__)
+		m_cMalloc_trim = reinterpret_cast<func7_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func7)));
+		#endif
 		// Note: We're cannot output anything here due to allocations under the hood; also, throw
 		// also allocation, so you're got recursive dump.
 		if (!dlerror()) return;	/* If custom allocator not preloaded, throw */
@@ -206,6 +209,9 @@ private:
 		m_Free = reinterpret_cast<func4_t>(dlsym(v_handle, m_c_func42));
 		m_Memalign = reinterpret_cast<func5_t>(dlsym(v_handle, m_c_func52));
 		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(v_handle, m_c_func62));
+		#if defined(__linux__)
+		m_Malloc_trim = reinterpret_cast<func7_t>(reinterpret_cast<std::uintptr_t>(dlsym(v_handle, m_c_func72)));
+		#endif
 		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
