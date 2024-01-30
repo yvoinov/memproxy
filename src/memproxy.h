@@ -57,13 +57,13 @@
 
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
-#define CUSTOM_MALLOC   "TCMallocInternalMalloc"
-#define CUSTOM_REALLOC  "TCMallocInternalRealloc"
-#define CUSTOM_CALLOC   "TCMallocInternalCalloc"
-#define CUSTOM_FREE     "TCMallocInternalFree"
-#define CUSTOM_MEMALIGN "TCMallocInternalMemalign"
-#define CUSTOM_SIZE     "TCMallocInternalMallocSize"
-#define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
+#define CUSTOM_MALLOC   "ltmalloc"
+#define CUSTOM_REALLOC  "ltrealloc"
+#define CUSTOM_CALLOC   "ltcalloc"
+#define CUSTOM_FREE     "ltfree"
+#define CUSTOM_MEMALIGN "ltmemalign"
+#define CUSTOM_SIZE     "ltmsize"
+#define CUSTOM_TRIM     "ltsqueeze"
 
 // Solaris has libc.so.1
 // Linux has libc.so.6
@@ -138,16 +138,9 @@ private:
 		m_cFree = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
 		m_cMemalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func5));
 		m_cMalloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, m_c_func6));
-		#if defined(__linux__)
-		m_cMalloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, m_c_func7));
-		// malloc_trim is absent in many implementations of custom allocators, so we do not check for the presence of the function.
-		if (!m_cMalloc || !m_cRealloc || !m_cCalloc || !m_cFree || !m_cMemalign || !m_cMalloc_usable_size)
-		#else
-		if (!m_cMalloc || !m_cRealloc || !m_cCalloc || !m_cFree || !m_cMemalign)
-		#endif
-			// Note: We're cannot output anything here due to allocations under the hood; also, throw
-			// also allocation, so you're got recursive dump.
-			return;	/* If custom allocator not preload, throw */
+		// Note: We're cannot output anything here due to allocations under the hood; also, throw
+		// also allocation, so you're got recursive dump.
+		if (!dlerror()) return;	/* If custom allocator not preloaded, throw */
 	}
 
 	/* Memory functions names */
@@ -213,13 +206,7 @@ private:
 		m_Free = reinterpret_cast<func4_t>(dlsym(v_handle, m_c_func42));
 		m_Memalign = reinterpret_cast<func5_t>(dlsym(v_handle, m_c_func52));
 		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(v_handle, m_c_func62));
-		#if defined(__linux__)
-		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(v_handle, m_c_func72));
-		if (!m_Malloc || !m_Realloc || !m_Calloc || !m_Free || !m_Memalign || !m_Malloc_usable_size)
-		#else
-		if (!m_Malloc || !m_Realloc || !m_Calloc || !m_Free || !m_Memalign)
-		#endif
-			return;	/* If libC not preload, throw */
+		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
 	/* Memory functions names */
