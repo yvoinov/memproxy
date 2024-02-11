@@ -61,13 +61,13 @@
 
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
-#define CUSTOM_MALLOC   "ltmalloc"
-#define CUSTOM_REALLOC  "ltrealloc"
-#define CUSTOM_CALLOC   "ltcalloc"
-#define CUSTOM_FREE     "ltfree"
-#define CUSTOM_MEMALIGN "ltmemalign"
-#define CUSTOM_SIZE     "ltmsize"
-#define CUSTOM_TRIM     "ltsqueeze"
+#define CUSTOM_MALLOC   "TCMallocInternalMalloc"
+#define CUSTOM_REALLOC  "TCMallocInternalRealloc"
+#define CUSTOM_CALLOC   "TCMallocInternalCalloc"
+#define CUSTOM_FREE     "TCMallocInternalFree"
+#define CUSTOM_MEMALIGN "TCMallocInternalMemalign"
+#define CUSTOM_SIZE     "TCMallocInternalMallocSize"
+#define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
 
 // Solaris has libc.so.1
 // Linux has libc.so.6
