@@ -155,6 +155,9 @@ fi
 dnl Check libdl and header
 AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NOTICE([libdl not found])])
 
+dnl Check required headers
+AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])])
+
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)
 AC_OUTPUT

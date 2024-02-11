@@ -14,17 +14,6 @@
 #include <string>
 #include <unordered_set>
 
-#include <sys/mman.h>
-
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__)
-#include <malloc.h>
-#endif
-#include <errno.h>
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
 #if !HAVE_DLFCN_H
 #error Require dlfcn.h to build
 #else
@@ -35,6 +24,21 @@
 #error Require unistd.h to build
 #else
 #include <unistd.h>	// For sysconf()
+#endif
+
+#if !HAVE_SYS_MMAN_H
+#error Require sys/mman.h to build
+#else
+#include <sys/mman.h>
+#endif
+
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__)
+#include <malloc.h>
+#endif
+#include <errno.h>
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
 #endif
 
 // Hints to tell the compiler if a condition is likely or unlikely to be true.
@@ -57,13 +61,13 @@
 
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
-#define CUSTOM_MALLOC   "TCMallocInternalMalloc"
-#define CUSTOM_REALLOC  "TCMallocInternalRealloc"
-#define CUSTOM_CALLOC   "TCMallocInternalCalloc"
-#define CUSTOM_FREE     "TCMallocInternalFree"
-#define CUSTOM_MEMALIGN "TCMallocInternalMemalign"
-#define CUSTOM_SIZE     "TCMallocInternalMallocSize"
-#define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
+#define CUSTOM_MALLOC   "ltmalloc"
+#define CUSTOM_REALLOC  "ltrealloc"
+#define CUSTOM_CALLOC   "ltcalloc"
+#define CUSTOM_FREE     "ltfree"
+#define CUSTOM_MEMALIGN "ltmemalign"
+#define CUSTOM_SIZE     "ltmsize"
+#define CUSTOM_TRIM     "ltsqueeze"
 
 // Solaris has libc.so.1
 // Linux has libc.so.6
