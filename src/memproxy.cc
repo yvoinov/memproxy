@@ -66,12 +66,8 @@ inline void free_impl(voidPtr_t ptr)
 
 inline voidPtr_t calloc_impl(uInt_t n, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!MemoryProxyFunctions1::GetInstance().m_cCalloc)) {
-		static voidPtr_t v_ptr { nullptr };
-		if (!v_ptr)
-			v_ptr = reinterpret_cast<voidPtr_t>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, n * size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
-		return v_ptr;
-	}
+	if (MEMPROXY_UNLIKELY(!MemoryProxyFunctions1::GetInstance().m_cCalloc))
+		return reinterpret_cast<voidPtr_t>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, n * size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
 	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Calloc(n, size);
 	else return MemoryProxyFunctions1::GetInstance().m_cCalloc(n, size);
 }
