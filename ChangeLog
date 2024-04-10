@@ -76,6 +76,10 @@ IMPROVEMENT: Added checking dlerror in ctors.
 ==========
 IMPROVEMENT: Added header check: sys/mman.h
 
-03-26-2023
+03-26-2024
 ==========
 IMPROVEMENT: Reworked calloc() hack to get rid static ptr.
+
+04-10-2024
+==========
+IMPROVEMENT: Got rid unnesessary static linking code.
