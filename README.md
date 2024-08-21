@@ -62,7 +62,7 @@ or
 
 add /usr/local/lib to /etc/ld.so.conf, then run ldconfig as root.
 
-#### FreeBSD/OpenBSD
+#### FreeBSD/OpenBSD/NetBSD
 
 As root execute command:
 ```sh
