@@ -1,11 +1,11 @@
 #pragma once
 
 #if !__cplusplus >= 201103L || !__cplusplus >= 199711L
-	#error This program needs at least a C++11 compliant compiler
+#	error This program needs at least a C++11 compliant compiler
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include "autoconf.h"
+#	include "autoconf.h"
 #endif
 
 #include <cstdlib>	// For std::size_t
@@ -15,45 +15,45 @@
 #include <unordered_set>
 
 #if !HAVE_DLFCN_H
-#error Require dlfcn.h to build
+#	error Require dlfcn.h to build
 #else
-#include <dlfcn.h>	// For dlsym/dlopen
+#	include <dlfcn.h>	// For dlsym/dlopen
 #endif
 
 #if !HAVE_UNISTD_H
-#error Require unistd.h to build
+#	error Require unistd.h to build
 #else
-#include <unistd.h>	// For sysconf()
+#	include <unistd.h>	// For sysconf()
 #endif
 
 #if !HAVE_SYS_MMAN_H
-#error Require sys/mman.h to build
+#	error Require sys/mman.h to build
 #else
-#include <sys/mman.h>
+#	include <sys/mman.h>
 #endif
 
 #if !defined(__FreeBSD__) && !defined(__OpenBSD__)
-#include <malloc.h>
+#	include <malloc.h>
 #endif
 #include <errno.h>
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+#	define _GNU_SOURCE
 #endif
 
 // Hints to tell the compiler if a condition is likely or unlikely to be true.
 #if defined(MEMPROXY_LIKELY) || defined(MEMPROXY_UNLIKELY)
-#if !defined(MEMPROXY_LIKELY) || !defined(MEMPROXY_UNLIKELY)
-#	error MEMPROXY_LIKELY and MEMPROXY_UNLIKELY should either both be provided, or both left undefined.
-#endif
+#	if !defined(MEMPROXY_LIKELY) || !defined(MEMPROXY_UNLIKELY)
+#		error MEMPROXY_LIKELY and MEMPROXY_UNLIKELY should either both be provided, or both left undefined.
+#	endif
 #else
-#if defined(__GNUC__) || defined(__clang__) || defined(__SUNPRO_CC)
-#	define MEMPROXY_LIKELY(x) __builtin_expect(!!(x), 1)
-#	define MEMPROXY_UNLIKELY(x) __builtin_expect(!!(x), 0)
-#else
-#	define MEMPROXY_LIKELY(x) (x)
-#	define MEMPROXY_UNLIKELY(x) (x)
-#endif
+#	if defined(__GNUC__) || defined(__clang__) || defined(__SUNPRO_CC)
+#		define MEMPROXY_LIKELY(x) __builtin_expect(!!(x), 1)
+#		define MEMPROXY_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#	else
+#		define MEMPROXY_LIKELY(x) (x)
+#		define MEMPROXY_UNLIKELY(x) (x)
+#	endif
 #endif
 
 // Executable name limit
@@ -61,32 +61,32 @@
 
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
-#define CUSTOM_MALLOC   "TCMallocInternalMalloc"
-#define CUSTOM_REALLOC  "TCMallocInternalRealloc"
-#define CUSTOM_CALLOC   "TCMallocInternalCalloc"
-#define CUSTOM_FREE     "TCMallocInternalFree"
-#define CUSTOM_MEMALIGN "TCMallocInternalMemalign"
-#define CUSTOM_SIZE     "TCMallocInternalMallocSize"
-#define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
+#define CUSTOM_MALLOC   "ltmalloc"
+#define CUSTOM_REALLOC  "ltrealloc"
+#define CUSTOM_CALLOC   "ltcalloc"
+#define CUSTOM_FREE     "ltfree"
+#define CUSTOM_MEMALIGN "ltmemalign"
+#define CUSTOM_SIZE     "ltmsize"
+#define CUSTOM_TRIM     "ltsqueeze"
 
 // Solaris has libc.so.1
 // Linux has libc.so.6
 // FreeBSD has libc.so.7
 // OpenBSD has libc.so.9x.0
 #if defined(__linux__)
-	#define MEMPROXY_LIBC "libc.so.6"
+#	define MEMPROXY_LIBC "libc.so.6"
 #elif defined(__sun__)
-	#define MEMPROXY_LIBC "libc.so.1"
+#	define MEMPROXY_LIBC "libc.so.1"
 #elif defined(__FreeBSD__)
-	#define MEMPROXY_LIBC "libc.so.7"
+#	define MEMPROXY_LIBC "libc.so.7"
 #elif defined(__OpenBSD__)
-	#define MEMPROXY_LIBC "libc.so.97.0"
+#	define MEMPROXY_LIBC "libc.so.97.0"
 #else
 	#error Unsupported OS
 #endif
 
 #ifndef CONF_FILE
-#define CONF_FILE "/etc/memproxy.conf"
+#	define CONF_FILE "/etc/memproxy.conf"
 #endif
 #define STRINGIZE2(x) #x
 #define STRINGIZE(x) STRINGIZE2(x)

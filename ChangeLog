@@ -83,3 +83,7 @@ IMPROVEMENT: Reworked calloc() hack to get rid static ptr.
 04-10-2024
 ==========
 IMPROVEMENT: Got rid unnesessary static linking code.
+
+08-22-2024
+==========
+IMPROVEMENT: Code formatting.

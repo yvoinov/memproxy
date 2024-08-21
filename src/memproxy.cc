@@ -1,9 +1,6 @@
 /**
  * Memory allocations calls proxifier
  */
-#if !defined(__GNUC__) && !defined(__clang__) && !defined(__SUNPRO_CC)
-#error Unsupported compiler
-#endif
 
 #include "memproxy.h"
 
@@ -201,7 +198,7 @@ int malloc_trim(std::size_t pad)
 }
 #endif
 
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__)
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__)
 struct mallinfo mallinfo(void)
 {
 	struct mallinfo m = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
