@@ -108,8 +108,9 @@ Config contents example:
 ;du
 top
 telegram
+wget
 ```
-Note: Strings starting from # of ; threats as comment and will be ignored.
+Note: Strings starting from # or ; threats as comment and will be ignored.
 
 ## Notes
 
