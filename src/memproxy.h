@@ -99,6 +99,26 @@ bool g_Exists { false };
 using uInt_t = std::size_t;
 using voidPtr_t = void*;
 
+class CheckProgramInList {
+protected:
+	CheckProgramInList() noexcept {
+		std::unordered_set<std::string> v_list;
+		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
+		if (v_fd.is_open()) {
+			std::string v_data;
+			while (std::getline(v_fd, v_data)) {
+				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
+				v_list.emplace(v_data);
+			}
+			if (v_list.find(getRuntimeNchunk()) != v_list.end())
+				g_Exists = true;
+			v_fd.close();
+		}
+	};
+private:
+	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
+};
+
 class FunctionsPtrTypes {
 protected:
 	using func1_t = voidPtr_t (*)(uInt_t);			/* func1_t Type 1: malloc */
@@ -112,7 +132,7 @@ protected:
 	#endif
 };
 
-class MemoryProxyFunctions1 : FunctionsPtrTypes {	// Memory functions from preloaded library
+class MemoryProxyFunctions1 : CheckProgramInList, FunctionsPtrTypes {	// Memory functions from preloaded library
 public:
 	func1_t m_cMalloc;	/* Arg type 1 */
 	func2_t m_cRealloc;	/* Arg type 2 */
@@ -135,7 +155,7 @@ public:
 	~MemoryProxyFunctions1() {}
 
 private:
-	MemoryProxyFunctions1() noexcept {	// It makes no sense to generate stack unwinding, in case of an exception, recursion to malloc will still occur here.
+	MemoryProxyFunctions1() noexcept : CheckProgramInList() {	// It makes no sense to generate stack unwinding, in case of an exception, recursion to malloc will still occur here.
 		m_cMalloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func1));
 		m_cRealloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, m_c_func2));
 		m_cCalloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
@@ -162,27 +182,7 @@ private:
 	#endif
 };
 
-class CheckProgramInList {
-protected:
-	CheckProgramInList() noexcept {
-		std::unordered_set<std::string> v_list;
-		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
-		if (v_fd.is_open()) {
-			std::string v_data;
-			while (std::getline(v_fd, v_data)) {
-				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
-				v_list.emplace(v_data);
-			}
-			if (v_list.find(getRuntimeNchunk()) != v_list.end())
-				g_Exists = true;
-			v_fd.close();
-		}
-	};
-private:
-	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
-};
-
-class MemoryProxyFunctions2 : FunctionsPtrTypes, CheckProgramInList {	// Memory functions from libC
+class MemoryProxyFunctions2 : FunctionsPtrTypes {	// Memory functions from libC
 public:
 	func1_t m_Malloc;
 	func2_t m_Realloc;
@@ -205,7 +205,7 @@ public:
 	~MemoryProxyFunctions2() {}
 
 private:
-	MemoryProxyFunctions2() noexcept : CheckProgramInList() {
+	MemoryProxyFunctions2() noexcept {
 		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
 		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
 		m_Realloc = reinterpret_cast<func2_t>(dlsym(v_handle, m_c_func22));

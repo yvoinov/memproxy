@@ -87,3 +87,7 @@ IMPROVEMENT: Got rid unnesessary static linking code.
 08-22-2024
 ==========
 IMPROVEMENT: Code formatting.
+
+09-13-2024
+==========
+FIX: CheckProgramInList class initialization.
