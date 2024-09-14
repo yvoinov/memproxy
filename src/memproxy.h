@@ -69,20 +69,12 @@
 #define CUSTOM_SIZE     "TCMallocInternalMallocSize"
 #define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
 
-// Solaris has libc.so.1
-// Linux has libc.so.6
-// FreeBSD has libc.so.7
-// OpenBSD has libc.so.9x.0
-#if defined(__linux__)
-#	define MEMPROXY_LIBC "libc.so.6"
-#elif defined(__sun__)
-#	define MEMPROXY_LIBC "libc.so.1"
-#elif defined(__FreeBSD__)
-#	define MEMPROXY_LIBC "libc.so.7"
-#elif defined(__OpenBSD__)
-#	define MEMPROXY_LIBC "libc.so.97.0"
+// Solaris, Linux, FreeBSD has symbolic or hard link to the latest libc.
+// OpenBSD has libc.so.9x.0 and has no links.
+#if defined(__OpenBSD__)
+#	define MEMPROXY_LIBC "libc.so.99.0"	// Latest OpenBSD
 #else
-	#error Unsupported OS
+#	define MEMPROXY_LIBC "libc.so"
 #endif
 
 #ifndef CONF_FILE

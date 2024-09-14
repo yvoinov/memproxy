@@ -91,3 +91,7 @@ IMPROVEMENT: Code formatting.
 09-13-2024
 ==========
 FIX: CheckProgramInList class initialization.
+
+09-15-2024
+==========
+IMPROVEMENT: LibC macro made more cross-platform.
