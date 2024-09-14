@@ -145,7 +145,6 @@ public:
 	void operator=(const MemoryProxyFunctions1 &) = delete;
 
 	~MemoryProxyFunctions1() {}
-
 private:
 	MemoryProxyFunctions1() noexcept : CheckProgramInList() {	// It makes no sense to generate stack unwinding, in case of an exception, recursion to malloc will still occur here.
 		m_cMalloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func1));
@@ -195,7 +194,6 @@ public:
 	void operator=(const MemoryProxyFunctions2 &) = delete;
 
 	~MemoryProxyFunctions2() {}
-
 private:
 	MemoryProxyFunctions2() noexcept {
 		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
