@@ -206,6 +206,7 @@ private:
 		#if defined(__linux__)
 		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(v_handle, m_c_func72));
 		#endif
+		dlclose(v_handle);
 		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
