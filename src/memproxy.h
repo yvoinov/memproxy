@@ -14,6 +14,10 @@
 #include <string>
 #include <unordered_set>
 
+#ifndef _GNU_SOURCE
+#	define _GNU_SOURCE
+#endif
+
 #if !HAVE_DLFCN_H
 #	error Require dlfcn.h to build
 #else
@@ -36,10 +40,6 @@
 #	include <malloc.h>
 #endif
 #include <errno.h>
-
-#ifndef _GNU_SOURCE
-#	define _GNU_SOURCE
-#endif
 
 // Hints to tell the compiler if a condition is likely or unlikely to be true.
 #if defined(MEMPROXY_LIKELY) || defined(MEMPROXY_UNLIKELY)
