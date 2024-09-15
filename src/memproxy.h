@@ -193,10 +193,12 @@ public:
 	MemoryProxyFunctions2(MemoryProxyFunctions2 &other) = delete;
 	void operator=(const MemoryProxyFunctions2 &) = delete;
 
-	~MemoryProxyFunctions2() {}
+	~MemoryProxyFunctions2() { dlclose(v_handle); }
 private:
+	voidPtr_t v_handle { nullptr };
+
 	MemoryProxyFunctions2() noexcept {
-		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
+		v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
 		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
 		m_Realloc = reinterpret_cast<func2_t>(dlsym(v_handle, m_c_func22));
 		m_Calloc = reinterpret_cast<func3_t>(dlsym(v_handle, m_c_func32));
@@ -206,7 +208,6 @@ private:
 		#if defined(__linux__)
 		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(v_handle, m_c_func72));
 		#endif
-		dlclose(v_handle);
 		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
