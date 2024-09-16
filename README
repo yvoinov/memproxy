@@ -120,7 +120,7 @@ a null pointer and interposition of the corresponding function will not work.
 Important Linux note
 --------------------
 The  usage method described above works on operating systems with non-allocating
-dlopen(). Linux, however, performs calls to callock and malloc during the dlopen
+dlopen(). Linux, however, performs calls to calloc  and malloc during the dlopen
 call.
 
 Accordingly,   for  the  correct  operation  of  the  memproxy  on  Linux, it is
