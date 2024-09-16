@@ -98,7 +98,7 @@ Note 1: Do not define interposed malloc/realloc/free etc. Use internal API inste
 Note 2: malloc_trim is absent in many implementations of custom allocators, so we do not check for the presence of the function. Accordingly, dlsym will return a null pointer and interposition of the corresponding function will not work.
 
 #### Important Linux note
-The usage method described above works on operating systems with non-allocating dlopen(). Linux, however, performs calls to callok and malloc during the dlopen call.
+The usage method described above works on operating systems with non-allocating dlopen(). Linux, however, performs calls to calloc and malloc during the dlopen call.
 
 Accordingly, for the correct operation of the memproxy on Linux, it is necessary to use a non-obvious trick. Namely, to preload libc first, like this:
 ```sh
