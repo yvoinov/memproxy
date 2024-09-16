@@ -7,7 +7,7 @@
 namespace {
 
 /* Implementations */
-std::string CheckProgramInList::getRuntimeNchunk(uInt_t p_size) {
+inline std::string MemoryProxyFunctions2::getRuntimeNchunk(uInt_t p_size) {
 	std::string v_name;
 	#if defined(__FreeBSD__) || defined(__OpenBSD__)
 	if (const char* v_name_c = getprogname())
@@ -51,13 +51,13 @@ inline uInt_t get_page_size()
 
 inline voidPtr_t malloc_impl(uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Malloc(size);
+	if (MEMPROXY_UNLIKELY(g_Exists)) return mpf2.m_Malloc(size);
 	else return MemoryProxyFunctions1::GetInstance().m_cMalloc(size);
 }
 
 inline void free_impl(voidPtr_t ptr)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) MemoryProxyFunctions2::GetInstance().m_Free(ptr);
+	if (MEMPROXY_UNLIKELY(g_Exists)) mpf2.m_Free(ptr);
 	else MemoryProxyFunctions1::GetInstance().m_cFree(ptr);
 }
 
@@ -65,21 +65,21 @@ inline voidPtr_t calloc_impl(uInt_t n, uInt_t size)
 {
 	if (MEMPROXY_UNLIKELY(!MemoryProxyFunctions1::GetInstance().m_cCalloc))
 		return reinterpret_cast<voidPtr_t>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, n * size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
-	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Calloc(n, size);
+	if (MEMPROXY_UNLIKELY(g_Exists)) return mpf2.m_Calloc(n, size);
 	else return MemoryProxyFunctions1::GetInstance().m_cCalloc(n, size);
 }
 
 #if !defined __GLIBC__ || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 26)
 inline void cfree_impl(voidPtr_t ptr)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) MemoryProxyFunctions2::GetInstance().m_Free(ptr);
+	if (MEMPROXY_UNLIKELY(g_Exists)) mpf2.m_Free(ptr);
 	else MemoryProxyFunctions1::GetInstance().m_cFree(ptr);
 }
 #endif
 
 inline voidPtr_t realloc_impl(voidPtr_t ptr, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Realloc(ptr, size);
+	if (MEMPROXY_UNLIKELY(g_Exists)) return mpf2.m_Realloc(ptr, size);
 	else return MemoryProxyFunctions1::GetInstance().m_cRealloc(ptr, size);
 }
 
@@ -89,7 +89,7 @@ inline voidPtr_t memalign_impl(uInt_t alignment, uInt_t size)
 		errno = EINVAL;
 		return nullptr;
 	}
-	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr_errno(MemoryProxyFunctions2::GetInstance().m_Memalign(alignment, size));
+	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr_errno(mpf2.m_Memalign(alignment, size));
 	else return check_ptr_errno(MemoryProxyFunctions1::GetInstance().m_cMemalign(alignment, size));
 }
 
@@ -98,7 +98,7 @@ inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
 	if (MEMPROXY_UNLIKELY(((alignment % sizeof(void*)) || (alignment & (alignment - 1)) || alignment == 0)))
 		return EINVAL;
 	void* ptr;
-	if (MEMPROXY_UNLIKELY(g_Exists)) ptr = MemoryProxyFunctions2::GetInstance().m_Memalign(alignment, size);
+	if (MEMPROXY_UNLIKELY(g_Exists)) ptr = mpf2.m_Memalign(alignment, size);
 	else ptr = MemoryProxyFunctions1::GetInstance().m_cMemalign(alignment, size);
 	if (MEMPROXY_UNLIKELY(!ptr))
 		return ENOMEM;
@@ -110,20 +110,20 @@ inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
 
 inline voidPtr_t aligned_alloc_impl(uInt_t alignment, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr(MemoryProxyFunctions2::GetInstance().m_Memalign(alignment, size));
+	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr(mpf2.m_Memalign(alignment, size));
 	else return check_ptr(MemoryProxyFunctions1::GetInstance().m_cMemalign(alignment, size));
 }
 
 inline voidPtr_t valloc_impl(uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr_errno(MemoryProxyFunctions2::GetInstance().m_Memalign(get_page_size(), size));
+	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr_errno(mpf2.m_Memalign(get_page_size(), size));
 	else return check_ptr_errno(MemoryProxyFunctions1::GetInstance().m_cMemalign(get_page_size(), size));	//get_page_size() returns OS page size
 }
 
 inline voidPtr_t pvalloc_impl(uInt_t size)
 {
 	if (MEMPROXY_UNLIKELY(size == 0)) size = get_page_size();	// pvalloc(0) should allocate one page, according to https://man.cx/libmpatrol(3)
-	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr_errno(MemoryProxyFunctions2::GetInstance().m_Memalign(get_page_size(), size));
+	if (MEMPROXY_UNLIKELY(g_Exists)) return check_ptr_errno(mpf2.m_Memalign(get_page_size(), size));
 	else return check_ptr_errno(MemoryProxyFunctions1::GetInstance().m_cMemalign(get_page_size(), size));
 }
 
@@ -185,14 +185,14 @@ void* pvalloc(std::size_t size)
 
 std::size_t malloc_usable_size(void *ptr)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Malloc_usable_size(ptr);
+	if (MEMPROXY_UNLIKELY(g_Exists)) return mpf2.m_Malloc_usable_size(ptr);
 	else return MemoryProxyFunctions1::GetInstance().m_cMalloc_usable_size(ptr);
 }
 
 #if defined(__linux__)
 int malloc_trim(std::size_t pad)
 {
-	if (MEMPROXY_UNLIKELY(g_Exists)) MemoryProxyFunctions2::GetInstance().m_Malloc_trim(pad);
+	if (MEMPROXY_UNLIKELY(g_Exists)) mpf2.m_Malloc_trim(pad);
 	else MemoryProxyFunctions1::GetInstance().m_cMalloc_trim(pad);
 	return 0;
 }
