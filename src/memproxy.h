@@ -73,6 +73,8 @@
 // OpenBSD has libc.so.9x.0 and has no links.
 #if defined(__OpenBSD__)
 #	define MEMPROXY_LIBC "libc.so.99.0"	// Latest OpenBSD
+#elif defined(__linux__)
+#	define MEMPROXY_LIBC "libc.so.6"
 #else
 #	define MEMPROXY_LIBC "libc.so"
 #endif
@@ -205,6 +207,13 @@ private:
 				g_Exists = true;
 			v_fd.close();
 		}
+		#if defined(__linux__)
+		if (!g_Exists) {
+			v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW | RTLD_NOLOAD);
+			if (v_handle) dlclose(v_handle);	// Trying to unload libc.so
+			if (v_handle) dlclose(v_handle);
+		}
+		#endif
 		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
