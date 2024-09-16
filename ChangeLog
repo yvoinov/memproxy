@@ -95,3 +95,8 @@ FIX: CheckProgramInList class initialization.
 09-15-2024
 ==========
 IMPROVEMENT: LibC macro made more cross-platform.
+
+09-16-2024
+==========
+IMPROVEMENT: LibC function initialization class.
+FIX: Got rid CheckProgramInList class.
