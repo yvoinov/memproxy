@@ -175,8 +175,15 @@ public:
 
 	~MemoryProxyFunctions2() {}
 private:
+	voidPtr_t v_handle { nullptr };
+
 	MemoryProxyFunctions2() noexcept {
-		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
+		#if !defined(__linux__)
+		v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
+		#else
+		v_handle = RTLD_NEXT;
+		#endif
+		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
 		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
 		m_Realloc = reinterpret_cast<func2_t>(dlsym(v_handle, m_c_func22));
 		m_Calloc = reinterpret_cast<func3_t>(dlsym(v_handle, m_c_func32));
@@ -215,8 +222,6 @@ private:
 	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
 };
 
-#if !defined(__linux__)
-MemoryProxyFunctions2& mpf2 = MemoryProxyFunctions2::GetInstance();
-#endif
+MemoryProxyFunctions2& mpf2 = MemoryProxyFunctions2::GetInstance();	// Instantiate libC memory functions and global exists flag here
 
 }	/* namespace */

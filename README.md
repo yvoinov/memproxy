@@ -72,6 +72,7 @@ and then run ldconfig as root or reboot system.
 
 Note: A custom allocator can have its own prerequisites.
 
+#### Running memproxy
 After the preparation is complete, you are ready to proxify your application.
 
 Since the easiest way to intercept memory allocation functions cross-platform is to use LD_PRELOAD, you must load the proxy library before custom allocator (after building memproxy of the appropriate bit size):
@@ -96,6 +97,20 @@ Note 1: Do not define interposed malloc/realloc/free etc. Use internal API inste
 
 Note 2: malloc_trim is absent in many implementations of custom allocators, so we do not check for the presence of the function. Accordingly, dlsym will return a null pointer and interposition of the corresponding function will not work.
 
+#### Important Linux note
+The usage method described above works on operating systems with non-allocating dlopen(). Linux, however, performs calls to callok and malloc during the dlopen call.
+
+Accordingly, for the correct operation of the memproxy on Linux, it is necessary to use a non-obvious trick. Namely, to preload libc first, like this:
+```sh
+# echo "/usr/lib/libc.so.6:libmemproxy.so:lib_custom_alloc_name.so" > /etc/ld.so.preload
+```
+Important - you must specify not a symbolic link, but a full absolute path to libc. To determine it, run the command:
+```sh
+# find / -name libc.so.*
+```
+Remember, you need to select the library of the correct bit depth (in case of multilib).
+
+With the specified preload sequence and the correct definition of the custom allocator's internal API functions, allocation calls will be correctly routed depending on the g_Exists flag.
 
 ## Configuration
 
@@ -119,5 +134,3 @@ Please note that memproxy is a plugin for custom allocator. If you don't load th
 ## Restrictions
 
 For technical reasons, I had to refuse to display error messages when checking the loading of the allocator and libC libraries. Any output statements contain malloc under the hood and lead to recursion. Thus, when segfaulting at startup, the first thing to check is that LD_PRELOAD is correct.
-
---------------------------------------------------------------------------------
