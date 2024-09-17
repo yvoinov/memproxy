@@ -158,27 +158,27 @@ void* __wrap_realloc(void* ptr, std::size_t size)
 	return realloc_impl(ptr, size);
 }
 
-void* memalign(std::size_t alignment, std::size_t size)
+void* __wrap_memalign(std::size_t alignment, std::size_t size)
 {
 	return memalign_impl(alignment, size);
 }
 
-int posix_memalign(void** memptr, std::size_t alignment, std::size_t size)
+int __wrap_posix_memalign(void** memptr, std::size_t alignment, std::size_t size)
 {
 	return posix_memalign_impl(memptr, alignment, size);
 }
 
-void* aligned_alloc(std::size_t alignment, std::size_t size)
+void* __wrap_aligned_alloc(std::size_t alignment, std::size_t size)
 {
 	return aligned_alloc_impl(alignment, size);
 }
 
-void* valloc(std::size_t size)
+void* __wrap_valloc(std::size_t size)
 {
 	return valloc_impl(size);
 }
 
-void* pvalloc(std::size_t size)
+void* __wrap_pvalloc(std::size_t size)
 {
 	return pvalloc_impl(size);
 }
