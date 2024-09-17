@@ -102,7 +102,7 @@ The usage method described above works on operating systems with non-allocating 
 
 Accordingly, for the correct operation of the memproxy on Linux, it is necessary to use a non-obvious trick. Namely, to explicit preload libc immediately after memproxy, like this:
 ```sh
-# echo "/usr/lib/libc.so.6:libmemproxy.so:lib_custom_alloc_name.so" > /etc/ld.so.preload
+# echo "libmemproxy.so:/usr/lib/libc.so.6:lib_custom_alloc_name.so" > /etc/ld.so.preload
 ```
 Important - you must specify not a symbolic link, but a full absolute path to libc. To determine it, run the command:
 ```sh
