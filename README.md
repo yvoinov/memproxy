@@ -100,7 +100,7 @@ Note 2: malloc_trim is absent in many implementations of custom allocators, so w
 #### Important Linux note
 The usage method described above works on operating systems with non-allocating dlopen(). Linux, however, performs calls to calloc and malloc during the dlopen call.
 
-Accordingly, for the correct operation of the memproxy on Linux, it is necessary to use a non-obvious trick. Namely, to preload libc first, like this:
+Accordingly, for the correct operation of the memproxy on Linux, it is necessary to use a non-obvious trick. Namely, to explicit preload libc immediately after memproxy, like this:
 ```sh
 # echo "/usr/lib/libc.so.6:libmemproxy.so:lib_custom_alloc_name.so" > /etc/ld.so.preload
 ```
