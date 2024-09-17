@@ -131,29 +131,29 @@ inline voidPtr_t pvalloc_impl(uInt_t size)
 
 extern "C" {
 
-void* malloc(std::size_t size)
+void* __wrap_malloc(std::size_t size)
 {
 	return malloc_impl(size);
 }
 
-void free(void* ptr)
+void __wrap_free(void* ptr)
 {
 	free_impl(ptr);
 }
 
-void* calloc(std::size_t n, std::size_t size)
+void* __wrap_calloc(std::size_t n, std::size_t size)
 {
 	return calloc_impl(n, size);
 }
 
 #if !defined __GLIBC__ || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 26)
-void cfree(void* ptr)
+void __wrap_cfree(void* ptr)
 {
 	free_impl(ptr);
 }
 #endif
 
-void* realloc(void* ptr, std::size_t size)
+void* __wrap_realloc(void* ptr, std::size_t size)
 {
 	return realloc_impl(ptr, size);
 }
@@ -183,7 +183,7 @@ void* pvalloc(std::size_t size)
 	return pvalloc_impl(size);
 }
 
-std::size_t malloc_usable_size(void *ptr)
+std::size_t __wrap_malloc_usable_size(void *ptr)
 {
 	if (MEMPROXY_UNLIKELY(g_Exists)) return MemoryProxyFunctions2::GetInstance().m_Malloc_usable_size(ptr);
 	else return MemoryProxyFunctions1::GetInstance().m_cMalloc_usable_size(ptr);
