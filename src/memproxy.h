@@ -180,11 +180,7 @@ private:
 	voidPtr_t v_handle { nullptr };
 
 	MemoryProxyFunctions2() noexcept {
-		#if !defined(__linux__)
-		v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
-		#else
-		v_handle = RTLD_NEXT;
-		#endif
+		v_handle = dlopen(MEMPROXY_LIBC, RTLD_LAZY | RTLD_GLOBAL);
 		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
 		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
 		m_Realloc = reinterpret_cast<func2_t>(dlsym(v_handle, m_c_func22));
@@ -207,13 +203,6 @@ private:
 				g_Exists = true;
 			v_fd.close();
 		}
-		#if defined(__linux__)
-		if (!g_Exists) {
-			v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW | RTLD_NOLOAD);
-			if (v_handle) dlclose(v_handle);	// Trying to unload libc.so
-			if (v_handle) dlclose(v_handle);
-		}
-		#endif
 		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
