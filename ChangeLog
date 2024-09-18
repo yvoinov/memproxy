@@ -104,3 +104,7 @@ FIX: Got rid CheckProgramInList class.
 09-17-2024
 ==========
 IMPROVEMENT: A correct methodology for working with allocating dlopen() on Linux has been found and implemented.
+
+09-18-2024
+==========
+IMPROVEMENT: Better build environment.
