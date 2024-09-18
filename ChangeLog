@@ -108,3 +108,7 @@ IMPROVEMENT: A correct methodology for working with allocating dlopen() on Linux
 09-18-2024
 ==========
 IMPROVEMENT: Better build environment.
+
+09-19-2024
+==========
+FIX: Reworked classes initialization.

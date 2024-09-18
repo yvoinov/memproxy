@@ -235,7 +235,7 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-AM_LDFLAGS = -Wl,--wrap=malloc -Wl,--wrap=free -Wl,--wrap=cfree -Wl,--wrap=realloc -Wl,--wrap=calloc -Wl,--wrap=memalign -Wl,--wrap=posix_memalign -Wl,--wrap=aligned_alloc -Wl,--wrap=valloc -Wl,--wrap=pvalloc -Wl,--wrap=malloc_usable_size
+AM_LDFLAGS = @AM_LDFLAGS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@

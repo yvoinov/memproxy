@@ -7,7 +7,7 @@
 namespace {
 
 /* Implementations */
-inline std::string MemoryProxyFunctions2::getRuntimeNchunk(uInt_t p_size) {
+inline std::string MemoryProxyFunctions1::getRuntimeNchunk(uInt_t p_size) {
 	std::string v_name;
 	#if defined(__FreeBSD__) || defined(__OpenBSD__)
 	if (const char* v_name_c = getprogname())

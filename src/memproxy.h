@@ -73,8 +73,6 @@
 // OpenBSD has libc.so.9x.0 and has no links.
 #if defined(__OpenBSD__)
 #	define MEMPROXY_LIBC "libc.so.99.0"	// Latest OpenBSD
-#elif defined(__linux__)
-#	define MEMPROXY_LIBC "libc.so.6"
 #else
 #	define MEMPROXY_LIBC "libc.so"
 #endif
@@ -119,8 +117,8 @@ public:
 	#endif
 
 	static MemoryProxyFunctions1& GetInstance() {
-		static MemoryProxyFunctions1 inst;
-		return inst;
+		static MemoryProxyFunctions1 inst1;
+		return inst1;
 	}
 
 	MemoryProxyFunctions1(MemoryProxyFunctions1 &other) = delete;
@@ -138,6 +136,18 @@ private:
 		#if defined(__linux__)
 		m_cMalloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, m_c_func7));
 		#endif
+		std::unordered_set<std::string> v_list;
+		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
+		if (v_fd.is_open()) {
+			std::string v_data;
+			while (std::getline(v_fd, v_data)) {
+				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
+				v_list.emplace(v_data);
+			}
+			if (v_list.find(getRuntimeNchunk()) != v_list.end())
+				g_Exists = true;
+			v_fd.close();
+		}
 		// Note: We're cannot output anything here due to allocations under the hood; also, throw
 		// also allocation, so you're got recursive dump.
 		if (!dlerror()) return;	/* If custom allocator not preloaded, throw */
@@ -153,7 +163,11 @@ private:
 	#if defined(__linux__)
 	static constexpr const char* m_c_func7 = CUSTOM_TRIM;
 	#endif
+
+	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
 };
+
+MemoryProxyFunctions1& mpf1 = MemoryProxyFunctions1::GetInstance();	// Instantiate custom memory functions and global exists flag here
 
 class MemoryProxyFunctions2 : FunctionsPtrTypes {	// Memory functions from libC
 public:
@@ -168,8 +182,8 @@ public:
 	#endif
 
 	static MemoryProxyFunctions2& GetInstance() {
-		static MemoryProxyFunctions2 inst;
-		return inst;
+		static MemoryProxyFunctions2 inst2;
+		return inst2;
 	}
 
 	MemoryProxyFunctions2(MemoryProxyFunctions2 &other) = delete;
@@ -191,18 +205,6 @@ private:
 		#if defined(__linux__)
 		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(v_handle, m_c_func72));
 		#endif
-		std::unordered_set<std::string> v_list;
-		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
-		if (v_fd.is_open()) {
-			std::string v_data;
-			while (std::getline(v_fd, v_data)) {
-				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
-				v_list.emplace(v_data);
-			}
-			if (v_list.find(getRuntimeNchunk()) != v_list.end())
-				g_Exists = true;
-			v_fd.close();
-		}
 		if (!dlerror()) return;	/* If libC not preloaded, throw */
 	}
 
@@ -216,10 +218,8 @@ private:
 	#if defined(__linux__)
 	static constexpr const char* m_c_func72 = "malloc_trim";
 	#endif
-
-	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
 };
 
-MemoryProxyFunctions2& mpf2 = MemoryProxyFunctions2::GetInstance();	// Instantiate libC memory functions and global exists flag here
+MemoryProxyFunctions2& mpf2 = MemoryProxyFunctions2::GetInstance();	// Instantiate libC memory functions
 
 }	/* namespace */
