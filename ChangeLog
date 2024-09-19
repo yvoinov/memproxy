@@ -112,3 +112,6 @@ IMPROVEMENT: Better build environment.
 09-19-2024
 ==========
 FIX: Reworked classes initialization.
+FIX: Partial undo change at 09-16-2024.
+FIX: Singletons instantiation.
+IMPROVEMENT: Classes instances references.
