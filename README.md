@@ -75,9 +75,12 @@ Note: A custom allocator can have its own prerequisites.
 #### Running memproxy
 After the preparation is complete, you are ready to proxify your application.
 
-Since the easiest way to intercept memory allocation functions cross-platform is to use LD_PRELOAD, you must load the proxy library before custom allocator (after building memproxy of the appropriate bit size):
+Since  the  easiest  way to intercept memory allocation functions cross-platform
+is    to   use   LD_PRELOAD,   you   must   load  the proxy library first before
+libc  and custom allocator (after building memproxy of the appropriate bit size)
+exactly in that order:
 ```sh
-# export LD_PRELOAD=libmemproxy.so:lib_custom_alloc_name.so
+# export LD_PRELOAD=libmemproxy.so:/usr/lib/libc.so:lib_custom_alloc_name.so
 ```
 where lib_custom_alloc_name is, for example, libjemalloc.
 
@@ -85,32 +88,28 @@ Note: Some platforms uses LD_PRELOAD_32/LD_PRELOAD_64/LDR_PRELOAD/LDR_PRELOAD64 
 
 The recommended practice, however, is to use memproxy globally (if the operating system allows it), in the /etc/ld.so.preload preload list.
 
-In this case, the /etc/ld.so.preload file should contain two entries, as shown below:
+In  this  case, the /etc/ld.so.preload file should contain two entries, as shown below:
 ```sh
-# echo "libmemproxy.so:lib_custom_alloc_name.so" > /etc/ld.so.preload
+# echo "libmemproxy.so:/usr/lib/libc.so:lib_custom_alloc_name.so" > \
+	/etc/ld.so.preload
 ```
-In some cases, you may need to add the full absolute path to the libraries.
-
-Also  keep  in  mind  you  must  edit  custom  allocator  API  function names in accordance with the API of the preloaded allocator in memproxy.h.
-
-Note 1: Do not define interposed malloc/realloc/free etc. Use internal API instead.
-
-Note 2: malloc_trim is absent in many implementations of custom allocators, so we do not check for the presence of the function. Accordingly, dlsym will return a null pointer and interposition of the corresponding function will not work.
-
-#### Important Linux note
-The usage method described above works on operating systems with non-allocating dlopen(). Linux, however, performs calls to calloc and malloc during the dlopen call.
-
-Accordingly, for the correct operation of the memproxy on Linux, it is necessary to use a non-obvious trick. Namely, to explicit preload libc immediately after memproxy, like this:
-```sh
-# echo "libmemproxy.so:/usr/lib/libc.so.6:lib_custom_alloc_name.so" > /etc/ld.so.preload
-```
-Important - you must specify not a symbolic link, but a full absolute path to libc. To determine it, run the command:
+Important - you must specify either symbolic link or full absolute path to libc. To determine it, run the command:
 ```sh
 # find / -name libc.so.*
 ```
 Remember, you need to select the library of the correct bit depth (in case of multilib).
 
+libc must be explicitly preloaded because custom allocators also interpose malloc/free/realloc/calloc functions that will be found by the dynamic loader earlier than libc functions, which are usually loaded much further from the beginning of the dependency list.
+
 With the specified preload sequence and the correct definition of the custom allocator's internal API functions, allocation calls will be correctly routed depending on the g_Exists flag.
+
+In some cases, you may need to add the full absolute path to the libraries.
+
+Also keep in mind you must edit custom allocator API function names in accordance with the API of the preloaded allocator in memproxy.h.
+
+Note 1: Do not define interposed malloc/realloc/free etc. Use internal API instead.
+
+Note 2: malloc_trim is absent in many implementations of custom allocators, so we do not check for the presence of the function. Accordingly, dlsym will return a null pointer and interposition of the corresponding function will not work.
 
 ## Configuration
 
