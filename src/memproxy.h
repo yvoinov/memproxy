@@ -69,14 +69,6 @@
 #define CUSTOM_SIZE     "TCMallocInternalMallocSize"
 #define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
 
-// Solaris, Linux, FreeBSD has symbolic or hard link to the latest libc.
-// OpenBSD has libc.so.9x.0 and has no links.
-#if defined(__OpenBSD__)
-#	define MEMPROXY_LIBC "libc.so.99.0"	// Latest OpenBSD
-#else
-#	define MEMPROXY_LIBC "libc.so"
-#endif
-
 #ifndef CONF_FILE
 #	define CONF_FILE "/etc/memproxy.conf"
 #endif
@@ -195,15 +187,14 @@ public:
 	~MemoryProxyFunctions2() {}
 private:
 	MemoryProxyFunctions2() noexcept {
-		voidPtr_t v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
-		m_Malloc = reinterpret_cast<func1_t>(dlsym(v_handle, m_c_func12));
-		m_Realloc = reinterpret_cast<func2_t>(dlsym(v_handle, m_c_func22));
-		m_Calloc = reinterpret_cast<func3_t>(dlsym(v_handle, m_c_func32));
-		m_Free = reinterpret_cast<func4_t>(dlsym(v_handle, m_c_func42));
-		m_Memalign = reinterpret_cast<func5_t>(dlsym(v_handle, m_c_func52));
-		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(v_handle, m_c_func62));
+		m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func12));
+		m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, m_c_func22));
+		m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func32));
+		m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func42));
+		m_Memalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func52));
+		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, m_c_func62));
 		#if defined(__linux__)
-		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(v_handle, m_c_func72));
+		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, m_c_func72));
 		#endif
 	}
 
