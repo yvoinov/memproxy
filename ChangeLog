@@ -115,3 +115,7 @@ FIX: Reworked classes initialization.
 FIX: Partial undo change at 09-16-2024.
 FIX: Singletons instantiation.
 IMPROVEMENT: Classes instances references.
+
+09-20-2024
+==========
+IMPROVEMENT: Got rid dlopen call due to unified preload scheme for all platforms.
