@@ -5,15 +5,15 @@
 #
 # Process this file with autoconf to produce a configure script.
 
-m4_define([VERSION_MAJOR],[1])
+m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[15])
+m4_define([VERSION_MICRO],[0])
 
 AC_INIT(memproxy, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memproxy)
 
-MEMPROXY_CURRENT=1
-MEMPROXY_REVISION=15
-MEMPROXY_AGE=0
+MEMPROXY_CURRENT=2
+MEMPROXY_REVISION=0
+MEMPROXY_AGE=1
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
 # 1.0.2 had 1:2:0
@@ -30,6 +30,7 @@ MEMPROXY_AGE=0
 # 1.0.13 had 1:13:0
 # 1.0.14 had 1:14:0
 # 1.0.15 had 1:15:0
+# 2.1.0 had 2:0:1
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
