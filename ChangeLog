@@ -122,4 +122,4 @@ IMPROVEMENT: Got rid dlopen call due to unified preload scheme for all platforms
 
 09-22-2024
 ==========
-IMPROVEMENT: Complete refactored; no more if's in wrapper functions.
+IMPROVEMENT: Complete refactoring; no more if's in wrapper functions.
