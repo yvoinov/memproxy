@@ -121,65 +121,65 @@ inline voidPtr_t pvalloc_impl(uInt_t size)
 
 extern "C" {
 
-void* __real_malloc(std::size_t size)
+void* __wrap_malloc(std::size_t size)
 {
 	return malloc_impl(size);
 }
 
-void __real_free(void* ptr)
+void __wrap_free(void* ptr)
 {
 	free_impl(ptr);
 }
 
-void* __real_calloc(std::size_t n, std::size_t size)
+void* __wrap_calloc(std::size_t n, std::size_t size)
 {
 	return calloc_impl(n, size);
 }
 
 #if !defined __GLIBC__ || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 26)
-void __real_cfree(void* ptr)
+void __wrap_cfree(void* ptr)
 {
 	free_impl(ptr);
 }
 #endif
 
-void* __real_realloc(void* ptr, std::size_t size)
+void* __wrap_realloc(void* ptr, std::size_t size)
 {
 	return realloc_impl(ptr, size);
 }
 
-void* __real_memalign(std::size_t alignment, std::size_t size)
+void* __wrap_memalign(std::size_t alignment, std::size_t size)
 {
 	return memalign_impl(alignment, size);
 }
 
-int __real_posix_memalign(void** memptr, std::size_t alignment, std::size_t size)
+int __wrap_posix_memalign(void** memptr, std::size_t alignment, std::size_t size)
 {
 	return posix_memalign_impl(memptr, alignment, size);
 }
 
-void* __real_aligned_alloc(std::size_t alignment, std::size_t size)
+void* __wrap_aligned_alloc(std::size_t alignment, std::size_t size)
 {
 	return aligned_alloc_impl(alignment, size);
 }
 
-void* __real_valloc(std::size_t size)
+void* __wrap_valloc(std::size_t size)
 {
 	return valloc_impl(size);
 }
 
-void* __real_pvalloc(std::size_t size)
+void* __wrap_pvalloc(std::size_t size)
 {
 	return pvalloc_impl(size);
 }
 
-std::size_t __real_malloc_usable_size(void *ptr)
+std::size_t __wrap_malloc_usable_size(void *ptr)
 {
 	return mpf.m_Malloc_usable_size(ptr);
 }
 
 #if defined(__linux__)
-int __real_malloc_trim(std::size_t pad)
+int __wrap_malloc_trim(std::size_t pad)
 {
 	mpf.m_Malloc_trim(pad);
 	return 0;
