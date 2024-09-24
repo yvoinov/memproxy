@@ -4,8 +4,6 @@
 
 #include "memproxy.h"
 
-namespace {
-
 extern "C" {
 
 void* __real_malloc(std::size_t size);
@@ -26,6 +24,8 @@ int __real_malloc_trim(std::size_t pad);
 #endif
 
 }
+
+namespace {
 
 /* Implementations */
 std::string CheckProgramInList::getRuntimeNchunk(uInt_t p_size) {
@@ -72,36 +72,36 @@ inline uInt_t get_page_size()
 
 inline voidPtr_t malloc_impl(uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) return __real_malloc(size);
-	return mpf.m_Malloc(size);
+	if (MEMPROXY_LIKELY(g_Init)) return mpf.m_Malloc(size);
+	else return __real_malloc(size);
 }
 
 inline void free_impl(voidPtr_t ptr)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) __real_free(ptr);
-	mpf.m_Free(ptr);
+	if (MEMPROXY_LIKELY(g_Init)) mpf.m_Free(ptr);
+	else __real_free(ptr);
 }
 
 inline voidPtr_t calloc_impl(uInt_t n, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) return __real_calloc(n, size);
-	return mpf.m_Calloc(n, size);
+	if (MEMPROXY_LIKELY(g_Init)) return mpf.m_Calloc(n, size);
+	else return __real_calloc(n, size);
 }
 
 inline voidPtr_t realloc_impl(voidPtr_t ptr, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) __real_realloc(ptr, size);
-	return mpf.m_Realloc(ptr, size);
+	if (MEMPROXY_LIKELY(g_Init)) return mpf.m_Realloc(ptr, size);
+	return __real_realloc(ptr, size);
 }
 
 inline voidPtr_t memalign_impl(uInt_t alignment, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) return __real_memalign(alignment, size);
 	if (MEMPROXY_UNLIKELY(((alignment % sizeof(void*)) || (alignment & (alignment - 1)) || alignment == 0))) {
 		errno = EINVAL;
 		return nullptr;
 	}
-	return check_ptr_errno(mpf.m_Memalign(alignment, size));
+	if (MEMPROXY_LIKELY(g_Init)) return check_ptr_errno(mpf.m_Memalign(alignment, size));
+	else return __real_memalign(alignment, size);
 }
 
 inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
@@ -109,8 +109,8 @@ inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
 	if (MEMPROXY_UNLIKELY(((alignment % sizeof(void*)) || (alignment & (alignment - 1)) || alignment == 0)))
 		return EINVAL;
 	void* ptr;
-	if (MEMPROXY_UNLIKELY(!g_Init)) ptr = __real_memalign(alignment, size);
-	else ptr = mpf.m_Memalign(alignment, size);
+	if (MEMPROXY_LIKELY(g_Init)) ptr = mpf.m_Memalign(alignment, size);
+	else ptr = __real_memalign(alignment, size);
 	if (MEMPROXY_UNLIKELY(!ptr))
 		return ENOMEM;
 	else {
@@ -121,21 +121,21 @@ inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
 
 inline voidPtr_t aligned_alloc_impl(uInt_t alignment, uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) return __real_memalign(alignment, size);
-	return check_ptr(mpf.m_Memalign(alignment, size));
+	if (MEMPROXY_LIKELY(g_Init)) return check_ptr(mpf.m_Memalign(alignment, size));
+	else return __real_memalign(alignment, size);
 }
 
 inline voidPtr_t valloc_impl(uInt_t size)
 {
-	if (MEMPROXY_UNLIKELY(!g_Init)) return __real_memalign(get_page_size(), size);
-	return check_ptr_errno(mpf.m_Memalign(get_page_size(), size));	//get_page_size() returns OS page size
+	if (MEMPROXY_LIKELY(g_Init)) return check_ptr_errno(mpf.m_Memalign(get_page_size(), size));
+	else return __real_memalign(get_page_size(), size);
 }
 
 inline voidPtr_t pvalloc_impl(uInt_t size)
 {
 	if (MEMPROXY_UNLIKELY(size == 0)) size = get_page_size();	// pvalloc(0) should allocate one page, according to https://man.cx/libmpatrol(3)
-	if (MEMPROXY_UNLIKELY(!g_Init)) return __real_memalign(get_page_size(), size);
-	return check_ptr_errno(mpf.m_Memalign(get_page_size(), size));
+	if (MEMPROXY_LIKELY(g_Init)) return check_ptr_errno(mpf.m_Memalign(get_page_size(), size));
+	else return __real_memalign(get_page_size(), size);
 }
 
 }	/* namespace */
