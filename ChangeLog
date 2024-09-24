@@ -133,3 +133,8 @@ FIX: Moved linker options to the correct automake variable.
 IMPROVEMENT: Got rid mman.h dependency.
 IMPROVEMENT: Add correct wrap declarations.
 IMPROVEMENT: Reworked initialization.
+
+09-25-2024
+==========
+FIX: Error in realloc wrapper.
+FIX: Moved __real_* from anonymous namespace.
