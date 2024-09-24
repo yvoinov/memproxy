@@ -127,3 +127,9 @@ IMPROVEMENT: Complete refactoring; no more if's in wrapper functions.
 09-23-2024
 ==========
 FIX: Moved linker options to the correct automake variable.
+
+09-24-2024
+==========
+IMPROVEMENT: Got rid mman.h dependency.
+IMPROVEMENT: Add correct wrap declarations.
+IMPROVEMENT: Reworked initialization.

@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[0])
+m4_define([VERSION_MICRO],[1])
 
 AC_INIT(memproxy, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memproxy)
 
 MEMPROXY_CURRENT=2
-MEMPROXY_REVISION=0
+MEMPROXY_REVISION=1
 MEMPROXY_AGE=1
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -31,6 +31,7 @@ MEMPROXY_AGE=1
 # 1.0.14 had 1:14:0
 # 1.0.15 had 1:15:0
 # 2.1.0 had 2:0:1
+# 2.1.1 had 2:1:1
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -156,9 +157,6 @@ fi
 
 dnl Check libdl and header
 AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NOTICE([libdl not found])])
-
-dnl Check required headers
-AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])])
 
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)

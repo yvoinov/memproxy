@@ -30,12 +30,6 @@
 #	include <unistd.h>	// For sysconf()
 #endif
 
-#if !HAVE_SYS_MMAN_H
-#	error Require sys/mman.h to build
-#else
-#	include <sys/mman.h>
-#endif
-
 #if !defined(__FreeBSD__) && !defined(__OpenBSD__)
 #	include <malloc.h>
 #endif
@@ -78,10 +72,32 @@
 
 namespace {
 
+bool g_Exists { false }, g_Init { false };
+
 using uInt_t = std::size_t;
 using voidPtr_t = void*;
 
-class MemoryProxyFunctions {
+class CheckProgramInList {
+protected:
+	CheckProgramInList() noexcept {
+		std::unordered_set<std::string> v_list;
+		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
+		if (v_fd.is_open()) {
+			std::string v_data;
+			while (std::getline(v_fd, v_data)) {
+				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
+				v_list.emplace(v_data);
+			}
+			if (v_list.find(getRuntimeNchunk()) != v_list.end())
+				g_Exists = true;
+			v_fd.close();
+		}
+	};
+private:
+	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
+};
+
+class MemoryProxyFunctions : CheckProgramInList {
 public:
 	using func1_t = voidPtr_t (*)(uInt_t);			/* func1_t Type 1: malloc */
 	using func2_t = voidPtr_t (*)(voidPtr_t, uInt_t);	/* func2_t Type 2: realloc */
@@ -113,9 +129,6 @@ public:
 
 	~MemoryProxyFunctions() {}
 private:
-	bool m_Exists { false };
-	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
-
 	/* Memory functions names */
 	static constexpr const char* m_c_func1 = CUSTOM_MALLOC;
 	static constexpr const char* m_c_func2 = CUSTOM_REALLOC;
@@ -138,21 +151,8 @@ private:
 	static constexpr const char* m_c_func72 = "malloc_trim";
 	#endif
 
-	MemoryProxyFunctions() noexcept {
-		std::unordered_set<std::string> v_list;
-		std::ifstream v_fd = std::ifstream(CONFIG, std::ios_base::binary|std::ios_base::in);
-		if (v_fd.is_open()) {
-			std::string v_data;
-			while (std::getline(v_fd, v_data)) {
-				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
-				v_list.emplace(v_data);
-			}
-			if (v_list.find(getRuntimeNchunk()) != v_list.end())
-				m_Exists = true;
-			v_fd.close();
-		}
-
-		if (!m_Exists) {
+	MemoryProxyFunctions() noexcept : CheckProgramInList() {
+		if (!g_Exists) {
 			m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func1));
 			m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, m_c_func2));
 			m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
@@ -173,6 +173,7 @@ private:
 			m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, m_c_func72));
 			#endif
 		}
+		g_Init = true;
 	}
 };
 

@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_CXXFLAGS = -Wl,--wrap=malloc -Wl,--wrap=free -Wl,--wrap=cfree -Wl,--wrap=realloc -Wl,--wrap=calloc -Wl,--wrap=memalign -Wl,--wrap=posix_memalign -Wl,--wrap=aligned_alloc -Wl,--wrap=valloc -Wl,--wrap=pvalloc -Wl,--wrap=malloc_usable_size -Wl,--wrap=malloc_trim
+AM_CXXFLAGS = -Wl,--wrap=malloc,--wrap=free,--wrap=cfree,--wrap=realloc,--wrap=calloc,--wrap=memalign,--wrap=posix_memalign,--wrap=aligned_alloc,--wrap=valloc,--wrap=pvalloc,--wrap=malloc_usable_size,--wrap=malloc_trim
 
 libmemproxy_la_CXXFLAGS = @CXXFLAGS@ -fPIC -DCONF_FILE=$(sysconfdir)/$(PACKAGE_NAME).conf
 libmemproxy_la_LDFLAGS = @LDFLAGS@ -shared -version-info @MEMPROXY_CURRENT@:@MEMPROXY_REVISION@:@MEMPROXY_AGE@
