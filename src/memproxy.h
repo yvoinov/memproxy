@@ -10,6 +10,7 @@
 
 #include <cstdlib>	// For std::size_t
 #include <cstdint>	// For std::uintptr_t
+#include <array>
 #include <fstream>
 #include <string>
 #include <unordered_set>
@@ -30,9 +31,12 @@
 #	include <unistd.h>	// For sysconf()
 #endif
 
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__)
-#	include <malloc.h>
+#if !HAVE_SYS_MMAN_H
+#	error Require sys/mman.h to build
+#else
+#	include <sys/mman.h>
 #endif
+
 #include <errno.h>
 
 // Hints to tell the compiler if a condition is likely or unlikely to be true.
@@ -53,6 +57,8 @@
 // Executable name limit
 #define NAME_CHUNK 16
 
+#define STATIC_ALLOC_BUFFER_SIZE 128000
+
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
 #define CUSTOM_MALLOC   "TCMallocInternalMalloc"
@@ -71,6 +77,8 @@
 #define CONFIG STRINGIZE(CONF_FILE)
 
 namespace {
+
+std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 
 bool g_Exists { false }, g_Init { false };
 
@@ -141,27 +149,15 @@ private:
 	#endif
 
 	MemoryProxyFunctions() noexcept : CheckProgramInList() {
-		if (!g_Exists) {
-			m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func1));
-			m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, m_c_func2));
-			m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
-			m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
-			m_Memalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func5));
-			m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, m_c_func6));
-			#if defined(__linux__)
-			m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, m_c_func7));
-			#endif
-		} else {
-			m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, "malloc"));
-			m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, "realloc"));
-			m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, "calloc"));
-			m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, "free"));
-			m_Memalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, "memalign"));
-			m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, "malloc_usable_size"));
-			#if defined(__linux__)
-			m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, "malloc_trim"));
-			#endif
-		}
+		m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func1 : "malloc"));
+		m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func2 : "realloc"));
+		m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func3 : "calloc"));
+		m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func4 : "free"));
+		m_Memalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func5 : "memalign"));
+		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func6 : "malloc_usable_size"));
+		#if defined(__linux__)
+		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func7 : "malloc_trim"));
+		#endif
 		g_Init = true;
 	}
 };
