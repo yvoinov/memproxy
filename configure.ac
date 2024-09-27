@@ -63,7 +63,7 @@ AC_CONFIG_HEADERS([src/autoconf.h:src/autoconf.h.in])
 AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([1.16 subdir-objects])
 AM_MAINTAINER_MODE
-AM_SILENT_RULES([yes])
+#AM_SILENT_RULES([yes])
 
 m4_include([acinclude/ax_cxx_compile_stdcxx.m4])
 m4_include([acinclude/ax_cxx_namespaces.m4])
@@ -157,6 +157,9 @@ fi
 
 dnl Check libdl and header
 AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NOTICE([libdl not found])])
+
+dnl Check required headers
+AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])])
 
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)
