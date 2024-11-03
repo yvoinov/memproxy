@@ -137,3 +137,7 @@ IMPROVEMENT: Reworked initialization.
 09-28-2024
 ==========
 PROJECT ARCHIVED due to incompatibility with modern Linuxes.
+
+11-03-2024
+==========
+IMPROVEMENT: configure.ac.
