@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 #  @configure_input@
 #
-#  Configuration scipt for ltalloc Library
+#  Configuration scipt for memproxy library
 #
 # Process this file with autoconf to produce a configure script.
 
@@ -24,7 +24,7 @@ MEMPROXY_AGE=1
 # 1.0.7 had 1:7:0
 # 1.0.8 had 1:8:0
 # 1.0.9 had 1:9:0
-# 1.0.10 had 1:10:0
+# 1.0.10 had 1:10:0                          +
 # 1.0.11 had 1:11:0
 # 1.0.12 had 1:12:0
 # 1.0.13 had 1:13:0
@@ -95,9 +95,9 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AX_COMPILER_VENDOR
 
-AC_PROG_EGREP
-if test "x$ac_cv_path_EGREP" = "xno"; then
-  AC_MSG_ERROR([egrep was not found; install it first])
+AC_PROG_GREP
+if test "x$ac_cv_path_GREP" = "xno"; then
+  AC_MSG_ERROR([grep was not found; install it first])
 fi
 
 LT_INIT
@@ -108,7 +108,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
 fi
 
 dnl If the user did not specify a C++ version.
-user_cxx=`echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-std="`
+user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`
 if test "x$user_cxx" = "x"; then
   dnl Check for C++11 compiler support
   AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
@@ -116,39 +116,39 @@ fi
 
 dnl If the user did not specify optimization level
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-fast|\-xO"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-fast|\\-xO"`; then
     CXXFLAGS="$CXXFLAGS -xO4"
     LDFLAGS="$LDFLAGS -xO4"
   fi
 else
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-O"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-O"`; then
     CXXFLAGS="$CXXFLAGS -O3"
   fi
 fi
 
 dnl Do the stuff needed for compiler-specific optimization/platform settings
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-xatomic"`; then
     CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xtarget"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-xtarget"`; then
    CXXFLAGS="$CXXFLAGS -xtarget=generic"
   fi
 else
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-mtune"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-mtune"`; then
     CXXFLAGS="$CXXFLAGS -mtune=native"
   fi
 fi
 
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
     dnl Check linkopt (Oracle Developer Studio)
-    AX_CHECK_COMPILE_FLAG([-xlinkopt], [CXXFLAGS="$CXXFLAGS -xlinkopt=2"; LDFLAGS="$LDFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
+    AX_CHECK_COMPILE_FLAG([-xlinkopt], [CXXFLAGS="$CXXFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
     dnl Check ThinLTO (CLang)
-    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto=thin"; LDFLAGS="$LDFLAGS -flto=thin"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
+    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto=thin"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 elif test "$ax_cv_cxx_compiler_vendor" = "gnu"; then
     dnl Check LTO (GCC)
-    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto"; LDFLAGS="$LDFLAGS -flto"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
+    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 fi
 
 if test x"$ac_cv_lto_supported" = xno; then
