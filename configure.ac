@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 #  @configure_input@
 #
-#  Configuration scipt for memproxy library
+#  Configuration script for memproxy library
 #
 # Process this file with autoconf to produce a configure script.
 
