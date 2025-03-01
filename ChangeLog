@@ -142,3 +142,8 @@ PROJECT ARCHIVED due to incompatibility with modern Linuxes.
 ==========
 IMPROVEMENT: configure.ac.
 FIX: Typo in configure.ac.
+
+03-01-2025
+==========
+IMPROVEMENT: Solaris only version.
+FIX: Replaced _t suffixes for custom types.
