@@ -67,7 +67,6 @@
 #define CUSTOM_FREE     "TCMallocInternalFree"
 #define CUSTOM_MEMALIGN "TCMallocInternalMemalign"
 #define CUSTOM_SIZE     "TCMallocInternalMallocSize"
-#define CUSTOM_TRIM     "TCMallocInternalMallocTrim"
 
 #ifndef CONF_FILE
 #	define CONF_FILE "/etc/memproxy.conf"
