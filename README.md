@@ -1,5 +1,5 @@
 # Memproxy
-[![CodeQL](https://github.com/yvoinov/memproxy/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/yvoinov/memproxy/actions/workflows/codeql-analysis.yml) [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/yvoinov/memproxy/blob/main/LICENSE)
+[[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/yvoinov/memproxy/blob/main/LICENSE)
 
 # This repository is archived and is no longer being developed.
 
