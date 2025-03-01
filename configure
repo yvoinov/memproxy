@@ -18226,6 +18226,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
+if test `uname` != "SunOS"; then
+  as_fn_error $? "\"OS $host_os is not supported\"" "$LINENO" 5
+fi
+
 if test "x$ax_cv_cxx_have_stl" = "xno"; then
   as_fn_error $? "STL was not found; it is require to build" "$LINENO" 5
 fi

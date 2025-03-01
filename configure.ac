@@ -102,6 +102,11 @@ fi
 
 LT_INIT
 
+dnl Check OS
+if test `uname` != "SunOS"; then
+  AC_MSG_ERROR(["OS $host_os is not supported"])
+fi
+
 dnl Check STL
 if test "x$ax_cv_cxx_have_stl" = "xno"; then
   AC_MSG_ERROR([STL was not found; it is require to build])

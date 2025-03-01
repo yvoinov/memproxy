@@ -7,18 +7,10 @@
 namespace {
 
 /* Implementations */
-std::string CheckProgramInList::getRuntimeNchunk(uInt_t p_size) {
+std::string CheckProgramInList::getRuntimeNchunk(uInt_type p_size) {
 	std::string v_name;
-	#if defined(__FreeBSD__) || defined(__OpenBSD__)
-	if (const char* v_name_c = getprogname())
-		v_name = v_name_c;
-	#elif defined(__sun__)
 	if (getexecname() != 0)
 		v_name = getexecname();
-	#else
-	if (const char* v_name_c = std::getenv("_"))
-		v_name = v_name_c;
-	#endif
 	if (v_name.find("/") != std::string::npos)
 		if (v_name.size() > p_size)
 			return v_name.substr(v_name.find_last_of("/") + 1, p_size);
@@ -27,14 +19,14 @@ std::string CheckProgramInList::getRuntimeNchunk(uInt_t p_size) {
 	else return v_name;
 }
 
-inline voidPtr_t check_ptr(voidPtr_t ptr)
+inline voidPtr_type check_ptr(voidPtr_type ptr)
 {
 	if (MEMPROXY_UNLIKELY(!ptr))
 		return nullptr;
 	else return ptr;
 }
 
-inline voidPtr_t check_ptr_errno(voidPtr_t ptr)
+inline voidPtr_type check_ptr_errno(voidPtr_type ptr)
 {
 	if (MEMPROXY_UNLIKELY(!ptr)) {
 		errno = ENOMEM;
@@ -42,34 +34,38 @@ inline voidPtr_t check_ptr_errno(voidPtr_t ptr)
 	} else return ptr;
 }
 
-inline uInt_t get_page_size()
+inline uInt_type get_page_size()
 {
-	static uInt_t pagesize { 0 };
-	if (!pagesize) pagesize = uInt_t(sysconf(_SC_PAGE_SIZE));
+	static uInt_type pagesize { 0 };
+	if (!pagesize) pagesize = uInt_type(sysconf(_SC_PAGE_SIZE));
 	return pagesize;
 }
 
-inline voidPtr_t malloc_impl(uInt_t size)
+inline voidPtr_type malloc_impl(uInt_type size)
 {
+	if (!g_Init)
+		return mpf.malloc_internal(size);
 	return mpf.m_Malloc(size);
 }
 
-inline void free_impl(voidPtr_t ptr)
+inline void free_impl(voidPtr_type ptr)
 {
 	mpf.m_Free(ptr);
 }
 
-inline voidPtr_t calloc_impl(uInt_t n, uInt_t size)
+inline voidPtr_type calloc_impl(uInt_type n, uInt_type size)
 {
+	if (!mpf.m_Calloc)	/* Requires calloc replacement to stop recursion during dlsym inner calloc call */
+		return mpf.malloc_internal(n * size);
 	return mpf.m_Calloc(n, size);
 }
 
-inline voidPtr_t realloc_impl(voidPtr_t ptr, uInt_t size)
+inline voidPtr_type realloc_impl(voidPtr_type ptr, uInt_type size)
 {
 	return mpf.m_Realloc(ptr, size);
 }
 
-inline voidPtr_t memalign_impl(uInt_t alignment, uInt_t size)
+inline voidPtr_type memalign_impl(uInt_type alignment, uInt_type size)
 {
 	if (MEMPROXY_UNLIKELY(((alignment % sizeof(void*)) || (alignment & (alignment - 1)) || alignment == 0))) {
 		errno = EINVAL;
@@ -78,7 +74,7 @@ inline voidPtr_t memalign_impl(uInt_t alignment, uInt_t size)
 	return check_ptr_errno(mpf.m_Memalign(alignment, size));
 }
 
-inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
+inline int posix_memalign_impl(voidPtr_type* memptr, uInt_type alignment, uInt_type size)
 {
 	if (MEMPROXY_UNLIKELY(((alignment % sizeof(void*)) || (alignment & (alignment - 1)) || alignment == 0)))
 		return EINVAL;
@@ -92,17 +88,17 @@ inline int posix_memalign_impl(voidPtr_t* memptr, uInt_t alignment, uInt_t size)
 	}
 }
 
-inline voidPtr_t aligned_alloc_impl(uInt_t alignment, uInt_t size)
+inline voidPtr_type aligned_alloc_impl(uInt_type alignment, uInt_type size)
 {
-	return check_ptr(mpf.m_Memalign(alignment, size));
+	return mpf.m_Memalign(alignment, size);
 }
 
-inline voidPtr_t valloc_impl(uInt_t size)
+inline voidPtr_type valloc_impl(uInt_type size)
 {
 	return check_ptr_errno(mpf.m_Memalign(get_page_size(), size));
 }
 
-inline voidPtr_t pvalloc_impl(uInt_t size)
+inline voidPtr_type pvalloc_impl(uInt_type size)
 {
 	if (MEMPROXY_UNLIKELY(size == 0)) size = get_page_size();	// pvalloc(0) should allocate one page, according to https://man.cx/libmpatrol(3)
 	return check_ptr_errno(mpf.m_Memalign(get_page_size(), size));
@@ -127,12 +123,10 @@ void* calloc(std::size_t n, std::size_t size)
 	return calloc_impl(n, size);
 }
 
-#if !defined __GLIBC__ || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 26)
 void cfree(void* ptr)
 {
 	free_impl(ptr);
 }
-#endif
 
 void* realloc(void* ptr, std::size_t size)
 {
@@ -168,13 +162,5 @@ std::size_t malloc_usable_size(void *ptr)
 {
 	return mpf.m_Malloc_usable_size(ptr);
 }
-
-#if defined(__linux__)
-int malloc_trim(std::size_t pad)
-{
-	mpf.m_Malloc_trim(pad);
-	return 0;
-}
-#endif
 
 } //for extern "C"

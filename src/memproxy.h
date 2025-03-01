@@ -10,7 +10,6 @@
 
 #include <cstdlib>	// For std::size_t
 #include <cstdint>	// For std::uintptr_t
-#include <array>
 #include <fstream>
 #include <string>
 #include <unordered_set>
@@ -39,6 +38,9 @@
 
 #include <errno.h>
 
+// Solaris libc.so.1
+#define MEMPROXY_LIBC "libc.so.1"
+
 // Hints to tell the compiler if a condition is likely or unlikely to be true.
 #if defined(MEMPROXY_LIKELY) || defined(MEMPROXY_UNLIKELY)
 #	if !defined(MEMPROXY_LIKELY) || !defined(MEMPROXY_UNLIKELY)
@@ -56,8 +58,6 @@
 
 // Executable name limit
 #define NAME_CHUNK 16
-
-#define STATIC_ALLOC_BUFFER_SIZE 128000
 
 // Custom allocator API function names
 // Note: Do not define interposed malloc/realloc/free etc. Use internal API instead
@@ -78,12 +78,10 @@
 
 namespace {
 
-std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
-
 bool g_Exists { false }, g_Init { false };
 
-using uInt_t = std::size_t;
-using voidPtr_t = void*;
+using uInt_type = std::size_t;
+using voidPtr_type = void*;
 
 class CheckProgramInList {
 protected:
@@ -93,7 +91,7 @@ protected:
 		if (v_fd.is_open()) {
 			std::string v_data;
 			while (std::getline(v_fd, v_data)) {
-				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comment
+				if (v_data[0] == '#' || v_data[0] == ';') continue;	// Skip comments
 				v_list.emplace(v_data);
 			}
 			if (v_list.find(getRuntimeNchunk()) != v_list.end())
@@ -102,30 +100,29 @@ protected:
 		}
 	};
 private:
-	std::string getRuntimeNchunk(uInt_t p_size = NAME_CHUNK);
+	std::string getRuntimeNchunk(uInt_type p_size = NAME_CHUNK);
 };
 
 class MemoryProxyFunctions : CheckProgramInList {
 public:
-	using func1_t = voidPtr_t (*)(uInt_t);			/* func1_t Type 1: malloc */
-	using func2_t = voidPtr_t (*)(voidPtr_t, uInt_t);	/* func2_t Type 2: realloc */
-	using func3_t = voidPtr_t (*)(uInt_t, uInt_t);		/* func3_t Type 3: calloc */
-	using func4_t = void (*)(voidPtr_t);			/* func4_t Type 4: free */
-	using func5_t = voidPtr_t (*)(uInt_t, uInt_t);		/* func5_t Type 5: memalign */
-	using func6_t = uInt_t (*)(voidPtr_t);			/* func6_t Type 6: malloc_usable_size */
-	#if defined(__linux__)
-	using func7_t = int (*)(uInt_t);			/* func7_t Type 7: malloc_trim */
-	#endif
+	using func1_type = voidPtr_type (*)(uInt_type);			/* func1_type Type 1: malloc */
+	using func2_type = voidPtr_type (*)(voidPtr_type, uInt_type);	/* func2_type Type 2: realloc */
+	using func3_type = voidPtr_type (*)(uInt_type, uInt_type);	/* func3_type Type 3: calloc */
+	using func4_type = void (*)(voidPtr_type);			/* func4_type Type 4: free */
+	using func5_type = voidPtr_type (*)(uInt_type, uInt_type);	/* func5_type Type 5: memalign */
+	using func6_type = uInt_type (*)(voidPtr_type);			/* func6_type Type 6: malloc_usable_size */
 
-	func1_t m_Malloc;	/* Arg type 1 */
-	func2_t m_Realloc;	/* Arg type 2 */
-	func3_t m_Calloc;	/* Arg type 3 */
-	func4_t m_Free;		/* Arg type 4 */
-	func5_t m_Memalign;	/* Arg type 5 */
-	func6_t m_Malloc_usable_size;	/* Arg type 6 */
-	#if defined(__linux__)
-	func7_t m_Malloc_trim;	/* Arg type 7 */
-	#endif
+	func1_type m_Malloc;	/* Arg type 1 */
+	func2_type m_Realloc;	/* Arg type 2 */
+	func3_type m_Calloc;	/* Arg type 3 */
+	func4_type m_Free;	/* Arg type 4 */
+	func5_type m_Memalign;	/* Arg type 5 */
+	func6_type m_Malloc_usable_size;	/* Arg type 6 */
+
+	voidPtr_type malloc_internal(uInt_type p_size)
+	{
+		return reinterpret_cast<voidPtr_type>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, p_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
+	}
 
 	static MemoryProxyFunctions& GetInstance() {
 		static MemoryProxyFunctions inst;
@@ -144,20 +141,32 @@ private:
 	static constexpr const char* m_c_func4 = CUSTOM_FREE;
 	static constexpr const char* m_c_func5 = CUSTOM_MEMALIGN;
 	static constexpr const char* m_c_func6 = CUSTOM_SIZE;
-	#if defined(__linux__)
-	static constexpr const char* m_c_func7 = CUSTOM_TRIM;
-	#endif
+
+	static constexpr const char* m_c_func12 = "malloc";
+	static constexpr const char* m_c_func22 = "realloc";
+	static constexpr const char* m_c_func32 = "calloc";
+	static constexpr const char* m_c_func42 = "free";
+	static constexpr const char* m_c_func52 = "memalign";
+	static constexpr const char* m_c_func62 = "malloc_usable_size";
 
 	MemoryProxyFunctions() noexcept : CheckProgramInList() {
-		m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func1 : "malloc"));
-		m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func2 : "realloc"));
-		m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func3 : "calloc"));
-		m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func4 : "free"));
-		m_Memalign = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func5 : "memalign"));
-		m_Malloc_usable_size = reinterpret_cast<func6_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func6 : "malloc_usable_size"));
-		#if defined(__linux__)
-		m_Malloc_trim = reinterpret_cast<func7_t>(dlsym(RTLD_NEXT, (!g_Exists) ? m_c_func7 : "malloc_trim"));
-		#endif
+		if (!g_Exists) {
+			m_Malloc = reinterpret_cast<func1_type>(dlsym(RTLD_NEXT, m_c_func1));
+			m_Realloc = reinterpret_cast<func2_type>(dlsym(RTLD_NEXT, m_c_func2));
+			m_Calloc = reinterpret_cast<func3_type>(dlsym(RTLD_NEXT, m_c_func3));
+			m_Free = reinterpret_cast<func4_type>(dlsym(RTLD_NEXT, m_c_func4));
+			m_Memalign = reinterpret_cast<func5_type>(dlsym(RTLD_NEXT, m_c_func5));
+			m_Malloc_usable_size = reinterpret_cast<func6_type>(dlsym(RTLD_NEXT, m_c_func6));
+		} else {
+			voidPtr_type v_handle = dlopen(MEMPROXY_LIBC, RTLD_NOW);
+			m_Malloc = reinterpret_cast<func1_type>(dlsym(v_handle, m_c_func12));
+			m_Realloc = reinterpret_cast<func2_type>(dlsym(v_handle, m_c_func22));
+			m_Calloc = reinterpret_cast<func3_type>(dlsym(v_handle, m_c_func32));
+			m_Free = reinterpret_cast<func4_type>(dlsym(v_handle, m_c_func42));
+			m_Memalign = reinterpret_cast<func5_type>(dlsym(v_handle, m_c_func52));
+			m_Malloc_usable_size = reinterpret_cast<func6_type>(dlsym(v_handle, m_c_func62));
+			dlclose(v_handle);
+		}
 		g_Init = true;
 	}
 };
